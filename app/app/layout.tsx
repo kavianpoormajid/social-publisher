@@ -17,7 +17,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       dir="rtl"
       className={`${vazirFont.className} h-full antialiased`}
     >
-      <body className="bg-gray-800 p-4">
+      <body className="bg-gray-500 p-4">
         <QueryProvider>
           <ToastProvider>{children}</ToastProvider>
         </QueryProvider>

@@ -1,8 +1,9 @@
 import axios from "axios";
 import { appToast } from "@/components/app-toast";
+import { Constants } from "./constants";
 
 export const axiosInstance = axios.create({
-  baseURL: process.env.BASE_URL,
+  baseURL: Constants.BASE_URL,
 });
 
 axiosInstance.interceptors.response.use(

@@ -9,6 +9,11 @@ export const POST_STATUSES = [
   "failed",
 ] as const;
 
+export type PostViewType = "board" | "table";
+export enum POSTS_VIEW_ENUM {
+  TABLE = "table",
+  BOARD = "board",
+}
 export type PostStatus = (typeof POST_STATUSES)[number];
 
 export interface Post {
