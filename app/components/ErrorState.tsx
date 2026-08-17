@@ -6,7 +6,7 @@ type ErrorStateProps = {
 
 export default function ErrorState({ onRetry }: ErrorStateProps) {
   return (
-    <div className="flex min-h-[300px] items-center justify-center">
+    <div className="flex min-h-75 items-center justify-center">
       <div className="flex max-w-sm flex-col items-center rounded-2xl border border-red-100 bg-white p-6 text-center shadow-sm">
         <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-red-50 text-red-500">
           <ExclamationTriangleIcon className="h-6 w-6" />

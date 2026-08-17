@@ -114,21 +114,17 @@ postsRouter.patch("/bulk", (req, res) => {
     ids.length === 0 ||
     !ids.every((id) => typeof id === "string")
   ) {
-    res
-      .status(422)
-      .json({
-        error: "VALIDATION_ERROR",
-        fields: { ids: "ids must be a non-empty array of strings" },
-      });
+    res.status(422).json({
+      error: "VALIDATION_ERROR",
+      fields: { ids: "ids must be a non-empty array of strings" },
+    });
     return;
   }
   if (ids.length > MAX_BULK_IDS) {
-    res
-      .status(422)
-      .json({
-        error: "VALIDATION_ERROR",
-        fields: { ids: `ids may contain at most ${MAX_BULK_IDS} entries` },
-      });
+    res.status(422).json({
+      error: "VALIDATION_ERROR",
+      fields: { ids: `ids may contain at most ${MAX_BULK_IDS} entries` },
+    });
     return;
   }
 
@@ -200,7 +196,7 @@ postsRouter.post("/", (req, res) => {
   }
 
   const timestamp = toIso(Date.now());
-  store.insert({
+  const post = store.insert({
     brand: value.brand,
     channel: value.channel,
     content: value.content,
@@ -212,7 +208,7 @@ postsRouter.post("/", (req, res) => {
     updatedAt: timestamp,
   });
 
-  res.status(201).end();
+  res.status(201).json(post);
 });
 
 postsRouter.patch("/:id", (req, res) => {

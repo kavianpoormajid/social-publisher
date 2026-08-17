@@ -11,7 +11,7 @@ import BoardDay from "./BoardDay";
 import { GetPostsResponse } from "../posts.type";
 import { useMovePost } from "../commands/use-move-post";
 import WeekNavigation from "./WeekNavigation";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 
 interface BoardViewProps {
   data?: GetPostsResponse;

@@ -3,13 +3,15 @@
 import { useCreatePost } from "@/features/posts/commands/use-create-post";
 import { PostEditor } from "@/features/posts/components/PostEditor";
 import { toCreatePostPayload } from "@/utils/mappers";
+import { useRouter } from "next/navigation";
 
 export default function NewPostPage() {
+  const router = useRouter();
   const createPost = useCreatePost();
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="mb-6 text-2xl font-semibold">Create post</h1>
+    <div className="rounded-2xl border border-gray-200 bg-gray-200 p-3 shadow-sm max-w-175 mx-auto">
+      <h1 className="mb-6 text-2xl font-semibold">پست جدید</h1>
 
       <PostEditor
         isSubmitting={createPost.isPending}
@@ -18,9 +20,9 @@ export default function NewPostPage() {
 
           const post = await createPost.mutateAsync(payload);
           console.log(post);
-          // router.push(`/`);
+          router.push(`/`);
         }}
       />
-    </main>
+    </div>
   );
 }

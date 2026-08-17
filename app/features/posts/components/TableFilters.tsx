@@ -6,6 +6,7 @@ import { format, parseISO } from "date-fns-jalali";
 import { Channel, CHANNELS, POST_STATUSES, PostStatus } from "@/types/global";
 
 import { PostsUrlState } from "@/utils/url-state";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 
 interface TableFiltersProps {
   currentState: PostsUrlState;
@@ -78,10 +79,11 @@ export default function TableFilters({
 
   function handleBrandChange(value: string) {
     setBrand(value);
-
-    update({
-      brand: value || undefined,
-      page: 1,
+  }
+  function handleFilterBrand() {
+    updateState({
+      ...currentState,
+      brand,
     });
   }
 
@@ -162,14 +164,18 @@ export default function TableFilters({
           <label className="mb-1.5 block text-sm font-medium text-gray-700">
             برند
           </label>
-
-          <input
-            type="text"
-            value={brand}
-            onChange={(event) => handleBrandChange(event.target.value)}
-            placeholder="نام برند"
-            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-gray-400"
-          />
+          <div className="flex gap-1 rounded-lg border border-gray-200 px-3 py-2.5">
+            <input
+              type="text"
+              value={brand}
+              onChange={(event) => handleBrandChange(event.target.value)}
+              placeholder="نام برند"
+              className="w-full  bg-white  text-sm outline-none transition focus:border-gray-400"
+            />
+            <button onClick={handleFilterBrand}>
+              <MagnifyingGlassIcon className="size-4" />
+            </button>
+          </div>
         </div>
 
         {/* Channel */}
