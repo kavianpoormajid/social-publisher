@@ -1,33 +1,32 @@
-import type { Dispatch, ReactNode, SetStateAction } from "react";
+import type { ReactNode } from "react";
 import { GetPostsParams, GetPostsResponse } from "../posts.type";
 import BaordView from "./BaordView";
-import TableView from "./TableView";
+// import TableView from "./TableView";
+import { PostsUrlState } from "@/utils/url-state";
+import { WeekRange } from "@/utils/hooks/use-week-range";
 
 type BaseDataViewProps = {
   data: GetPostsResponse | undefined;
   emptyState?: ReactNode;
   params: GetPostsParams;
-  onParamsChange: Dispatch<SetStateAction<GetPostsParams>>;
-  week: {
-    start: string;
-    end: string;
-  };
-  onWeekChange: Dispatch<
-    SetStateAction<{
-      start: string;
-      end: string;
-    }>
-  >;
+  updateState: (state: PostsUrlState) => void;
 };
 
 type BoardViewProps<T> = BaseDataViewProps & {
   type: "board";
   columns: T[];
+  weekRange: {
+    week: WeekRange;
+    nextWeek: () => void;
+    previousWeek: () => void;
+    currentWeek: () => void;
+  };
 };
 
 type TableViewProps = BaseDataViewProps & {
   type: "table";
   columns?: never;
+  weekRange?: never;
 };
 
 export type DataViewProps<T> = BoardViewProps<T> | TableViewProps;
@@ -37,17 +36,16 @@ export default function DataView<T>(props: DataViewProps<T>) {
     return (
       <BaordView
         data={props.data}
-        week={props.week}
-        onWeekChange={props.onWeekChange}
+        weekRange={props.weekRange}
+        updateState={props.updateState}
       />
     );
   }
 
-  return (
-    <TableView
-      params={props.params}
-      onParamsChange={props.onParamsChange}
-      data={props.data}
-    />
-  );
+  return null;
+  // <TableView
+  //   params={props.params}
+  //   onParamsChange={props.onParamsChange}
+  //   data={props.data}
+  // />
 }

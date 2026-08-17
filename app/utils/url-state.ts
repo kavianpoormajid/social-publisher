@@ -8,13 +8,13 @@ import {
 
 export interface PostsUrlState {
   view: PostViewType;
-  week: string;
-  channel: Channel[];
-  status: PostStatus[];
-  brand: string;
-  from?: string;
-  to?: string;
-  sort: PostsSort;
+  week?: string;
+  channel?: Channel[];
+  status?: PostStatus[];
+  brand?: string;
+  from: string;
+  to: string;
+  sort?: PostsSort;
 }
 const validSorts: readonly PostsSort[] = [
   "scheduledAt:asc",
@@ -57,9 +57,9 @@ export function parsePostsUrlState(
 
   const brand = searchParams.get("brand") ?? "";
 
-  const from = searchParams.get("from") ?? undefined;
+  const from = searchParams.get("from") ?? "";
 
-  const to = searchParams.get("to") ?? undefined;
+  const to = searchParams.get("to") ?? "undefined";
 
   const sortParam = searchParams.get("sort");
 
@@ -82,10 +82,10 @@ export function parsePostsUrlState(
 export function createPostsSearchParams(state: PostsUrlState): URLSearchParams {
   const params = new URLSearchParams();
   params.set("view", state.view);
-  if (state.channel.length > 0) {
+  if (state.channel && state.channel.length > 0) {
     params.set("channel", state.channel.join(","));
   }
-  if (state.status.length > 0) {
+  if (state.status && state.status.length > 0) {
     params.set("status", state.status.join(","));
   }
   if (state.brand) {
@@ -97,7 +97,9 @@ export function createPostsSearchParams(state: PostsUrlState): URLSearchParams {
   if (state.to) {
     params.set("to", state.to);
   }
-  params.set("sort", state.sort);
+  if (state.sort) {
+    params.set("sort", state.sort);
+  }
 
   return params;
 }

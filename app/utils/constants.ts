@@ -1,6 +1,6 @@
 export const Constants: {
   BASE_URL: string;
-  WEEK_DAYS: readonly [
+  WEEK_DAYS: [
     "شنبه",
     "یکشنبه",
     "دوشنبه",
