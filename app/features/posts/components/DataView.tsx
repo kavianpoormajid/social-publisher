@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
-import { GetPostsParams, GetPostsResponse } from "../posts.type";
+import { GetPostsResponse } from "../posts.type";
 import BaordView from "./BaordView";
-// import TableView from "./TableView";
 import { PostsUrlState } from "@/utils/url-state";
 import { WeekRange } from "@/utils/hooks/use-week-range";
+import TableView from "./TableView";
 
 type BaseDataViewProps = {
   data: GetPostsResponse | undefined;
   emptyState?: ReactNode;
-  params: GetPostsParams;
+  params: PostsUrlState;
   updateState: (state: PostsUrlState) => void;
 };
 
@@ -40,12 +40,12 @@ export default function DataView<T>(props: DataViewProps<T>) {
         updateState={props.updateState}
       />
     );
-  }
-
-  return null;
-  // <TableView
-  //   params={props.params}
-  //   onParamsChange={props.onParamsChange}
-  //   data={props.data}
-  // />
+  } else
+    return (
+      <TableView
+        currentState={props.params}
+        updateState={props.updateState}
+        data={props.data}
+      />
+    );
 }

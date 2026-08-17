@@ -8,7 +8,8 @@ import {
 
 export interface PostsUrlState {
   view: PostViewType;
-  week?: string;
+  page?: number;
+  pageSize?: number;
   channel?: Channel[];
   status?: PostStatus[];
   brand?: string;
@@ -49,8 +50,6 @@ export function parsePostsUrlState(
 
   const view: PostViewType = viewParam === "table" ? "table" : "board";
 
-  const week = searchParams.get("week") ?? getCurrentWeek();
-
   const channel = parseList(searchParams.get("channel"), validChannels);
 
   const status = parseList(searchParams.get("status"), POST_STATUSES);
@@ -59,7 +58,13 @@ export function parsePostsUrlState(
 
   const from = searchParams.get("from") ?? "";
 
-  const to = searchParams.get("to") ?? "undefined";
+  const to = searchParams.get("to") ?? "";
+  const page = searchParams.get("page")
+    ? parseInt(searchParams.get("page") ?? "")
+    : 1;
+  const pageSize = searchParams.get("pageSize")
+    ? parseInt(searchParams.get("pageSize") ?? "")
+    : 20;
 
   const sortParam = searchParams.get("sort");
 
@@ -69,7 +74,8 @@ export function parsePostsUrlState(
 
   return {
     view,
-    week,
+    page,
+    pageSize,
     channel,
     status,
     brand,
@@ -88,6 +94,12 @@ export function createPostsSearchParams(state: PostsUrlState): URLSearchParams {
   if (state.status && state.status.length > 0) {
     params.set("status", state.status.join(","));
   }
+  if (state.page && state.page > 0) {
+    params.set("page", state.page.toString());
+  }
+  if (state.pageSize && state.pageSize > 0) {
+    params.set("pageSize", state.pageSize.toString());
+  }
   if (state.brand) {
     params.set("brand", state.brand);
   }
@@ -102,34 +114,4 @@ export function createPostsSearchParams(state: PostsUrlState): URLSearchParams {
   }
 
   return params;
-}
-
-function getCurrentWeek(): string {
-  const now = new Date();
-
-  const day = now.getDay();
-
-  // JavaScript:
-  // Sunday = 0
-  // Monday = 1
-  // ...
-  // Saturday = 6
-
-  const daysSinceSaturday = day === 0 ? 1 : day === 6 ? 0 : day + 1;
-
-  const saturday = new Date(now);
-
-  saturday.setDate(now.getDate() - daysSinceSaturday);
-
-  return formatGregorianDate(saturday);
-}
-
-function formatGregorianDate(date: Date): string {
-  const year = date.getFullYear();
-
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
 }

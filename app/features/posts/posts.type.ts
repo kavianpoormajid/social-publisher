@@ -1,4 +1,5 @@
 import { Channel, Post, PostStatus, PostViewType } from "@/types/global";
+import { PostFormValues } from "./post-validation";
 export interface PostsUrlState {
   view: PostViewType;
   week: string;
@@ -59,7 +60,7 @@ export type UpdatePostPayload = Partial<CreatePostPayload>;
 
 export interface GetPostsResponse {
   items: Post[];
-  total: number;
+  totalCount: number;
   page: number;
   pageSize: number;
 }
@@ -183,3 +184,13 @@ export interface PostsTableFilters {
   sort?: PostsSort;
 }
 export type PostsViewProps = PostsBoardProps | PostsTableProps;
+
+export interface PostEditorProps {
+  initialValues?: Partial<PostFormValues>;
+
+  onSubmit: (values: PostFormValues) => Promise<void> | void;
+
+  onCancel?: () => void;
+
+  isSubmitting?: boolean;
+}

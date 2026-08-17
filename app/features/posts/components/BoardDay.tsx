@@ -29,7 +29,7 @@ export default function BoardDay({
     <section
       ref={ref}
       className={`
-        min-h-[500px]
+        min-h-125
         rounded-xl
         border
         bg-white

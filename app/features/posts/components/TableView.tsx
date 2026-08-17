@@ -1,23 +1,33 @@
-import { Post } from "@/types/global";
-import { GetPostsParams, GetPostsResponse } from "../posts.type";
-import { formatJalaliDateTime } from "@/utils/date";
-import { Dispatch, SetStateAction } from "react";
+import { GetPostsResponse } from "../posts.type";
+import { PostsUrlState } from "@/utils/url-state";
+
+import TableFilters from "./TableFilters";
+import TableList from "./TableList";
+
+interface TableViewProps {
+  data?: GetPostsResponse;
+
+  currentState: PostsUrlState;
+
+  updateState: (state: PostsUrlState) => void;
+}
 
 export default function TableView({
   data,
-  params,
-  onParamsChange,
-}: {
-  data?: GetPostsResponse;
-  params: GetPostsParams;
-  onParamsChange: Dispatch<SetStateAction<GetPostsParams>>;
-}) {
+  currentState,
+  updateState,
+}: TableViewProps) {
   return (
-    <div>
-      {new Date().toISOString()}
-      {data?.items.map((item: Post) => {
-        return <div key={item.id}>{formatJalaliDateTime(item.createdAt)}</div>;
-      })}
+    <div className="space-y-4">
+      {/* Filters */}
+      <TableFilters currentState={currentState} updateState={updateState} />
+
+      {/* List */}
+      <TableList
+        data={data}
+        currentState={currentState}
+        updateState={updateState}
+      />
     </div>
   );
 }

@@ -20,6 +20,8 @@ import ErrorState from "@/components/ErrorState";
 import DataView from "@/features/posts/components/DataView";
 import { Constants } from "@/utils/constants";
 import { useCallback } from "react";
+import Link from "next/link";
+import { PlusCircleIcon } from "@heroicons/react/24/solid";
 
 export default function Home() {
   const weekRange = useWeekRange();
@@ -47,15 +49,11 @@ export default function Home() {
     if (view === POSTS_VIEW_ENUM.BOARD) {
       updateState({
         view: POSTS_VIEW_ENUM.BOARD,
-        week: state.week,
-
         channel: [],
         status: [],
         brand: "",
-
         from: weekRange.week.startApi,
         to: weekRange.week.endApi,
-
         sort: "scheduledAt:asc",
       });
 
@@ -65,15 +63,11 @@ export default function Home() {
     if (view === POSTS_VIEW_ENUM.TABLE) {
       updateState({
         view: POSTS_VIEW_ENUM.TABLE,
-        week: state.week,
-
         channel: state.channel,
         status: state.status,
         brand: state.brand,
-
         from: state.from,
         to: state.to,
-
         sort: state.sort,
       });
     }
@@ -82,14 +76,14 @@ export default function Home() {
   const postsParams =
     viewType === POSTS_VIEW_ENUM.BOARD
       ? {
-          page: 1,
-          pageSize: 100,
+          page: state.page,
+          pageSize: state.pageSize,
           from: weekRange.week.startApi,
           to: weekRange.week.endApi,
         }
       : {
-          page: 1,
-          pageSize: 100,
+          page: state.page,
+          pageSize: state.pageSize,
           channel: state.channel || undefined,
           status: state.status || undefined,
           brand: state.brand || undefined,
@@ -110,8 +104,16 @@ export default function Home() {
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3 shadow-sm">
-      <div className="mb-3 flex justify-center">
+      <div className="mb-3 flex justify-between">
         <PostViewToggle viewType={state.view} changeView={changeView} />
+        <Link
+          href="/create"
+          type="button"
+          className="rounded-lg flex gap-2 items-center border border-gray-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <PlusCircleIcon className="size-6" />
+          پست جدید
+        </Link>
       </div>
 
       <div className="mt-4">
@@ -125,7 +127,12 @@ export default function Home() {
             params={state}
           />
         ) : (
-          <div>Table</div>
+          <DataView
+            data={data}
+            type="table"
+            updateState={updateState}
+            params={state}
+          />
         )}
       </div>
     </div>
