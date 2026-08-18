@@ -1,17 +1,19 @@
-"use client";
-
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { format, parseISO } from "date-fns-jalali";
 
 import { Channel, CHANNELS, POST_STATUSES, PostStatus } from "@/types/global";
 
 import { PostsUrlState } from "@/utils/url-state";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { useDebounce } from "@/utils/hooks/use-debounce";
 
 interface TableFiltersProps {
   currentState: PostsUrlState;
   updateState: (state: PostsUrlState) => void;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Helpers                                                                    */
+/* -------------------------------------------------------------------------- */
 
 function formatJalaliDateTime(value?: string) {
   if (!value) {
@@ -25,20 +27,32 @@ function formatJalaliDateTime(value?: string) {
   }
 }
 
-function toApiDateTime(value: string): string {
-  /*
-   * ورودی:
-   *
-   * 2026-08-07T11:00
-   *
-   * خروجی:
-   *
-   * 2026-08-07T11:00:00+03:30
-   */
-
+function toDateTimeLocalValue(value?: string) {
   if (!value) {
     return "";
   }
+
+  try {
+    return value.slice(0, 16);
+  } catch {
+    return "";
+  }
+}
+
+function toApiDateTime(value: string): string {
+  if (!value) {
+    return "";
+  }
+
+  /*
+   * datetime-local:
+   *
+   * 2026-08-07T11:00
+   *
+   * API:
+   *
+   * 2026-08-07T11:00:00+03:30
+   */
 
   if (value.length === 16) {
     return `${value}:00+03:30`;
@@ -47,45 +61,94 @@ function toApiDateTime(value: string): string {
   return value;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Brand Filter                                                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * این کامپوننت جدا شده تا با key بتوانیم زمانی که مقدار brand
+ * از URL تغییر کرد، state داخلی را بدون useEffect دوباره initialize کنیم.
+ *
+ * بنابراین:
+ *
+ * Refresh
+ * Back
+ * Forward
+ * تغییر URL
+ *
+ * همگی درست کار می‌کنند.
+ */
+function BrandFilter({
+  value,
+  onChange,
+}: {
+  value?: string;
+  onChange: (value: string) => void;
+}) {
+  const [brand, setBrand] = useState(value ?? "");
+
+  const debouncedChange = useDebounce(onChange, 500);
+
+  function handleChange(nextValue: string) {
+    setBrand(nextValue);
+    if (nextValue.length >= 3 || nextValue.length == 0)
+      debouncedChange(nextValue);
+  }
+
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-medium text-gray-700">
+        برند
+      </label>
+
+      <div className="flex gap-1 rounded-lg border border-gray-200 px-3 py-2.5">
+        <input
+          type="text"
+          value={brand}
+          onChange={(event) => handleChange(event.target.value)}
+          placeholder="نام برند"
+          className="w-full bg-white text-sm outline-none transition focus:border-gray-400"
+        />
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Main Component                                                             */
+/* -------------------------------------------------------------------------- */
+
 export default function TableFilters({
   currentState,
   updateState,
 }: TableFiltersProps) {
-  const [brand, setBrand] = useState(currentState.brand ?? "");
-
-  /*
-   * برای input داخلی مرورگر.
-   *
-   * این مقدار Gregorian است چون
-   * datetime-local همین فرمت را می‌خواهد.
-   *
-   * ولی مقدار نمایش داده‌شده توسط ما
-   * در UI پایین به صورت شمسی نشان داده می‌شود.
+  /**
+   * updateState را پایدار می‌کنیم تا callbackهای داخلی
+   * بی‌دلیل دوباره ساخته نشوند.
    */
-  const [fromInput, setFromInput] = useState(
-    currentState.from ? currentState.from.slice(0, 16) : "",
+  const update = useCallback(
+    (changes: Partial<PostsUrlState>) => {
+      updateState({
+        ...currentState,
+        ...changes,
+      });
+    },
+    [currentState, updateState],
   );
 
-  const [toInput, setToInput] = useState(
-    currentState.to ? currentState.to.slice(0, 16) : "",
+  /**
+   * تغییر Brand بعد از debounce
+   */
+  const handleBrandFilter = useCallback(
+    (value: string) => {
+      updateState({
+        ...currentState,
+        brand: value.trim() || undefined,
+        page: 1,
+      });
+    },
+    [currentState, updateState],
   );
-
-  function update(changes: Partial<PostsUrlState>) {
-    updateState({
-      ...currentState,
-      ...changes,
-    });
-  }
-
-  function handleBrandChange(value: string) {
-    setBrand(value);
-  }
-  function handleFilterBrand() {
-    updateState({
-      ...currentState,
-      brand,
-    });
-  }
 
   function handleChannelChange(value: string) {
     const channel = value ? [value as Channel] : undefined;
@@ -113,8 +176,6 @@ export default function TableFilters({
   }
 
   function handleFromChange(value: string) {
-    setFromInput(value);
-
     update({
       from: toApiDateTime(value),
       page: 1,
@@ -122,8 +183,6 @@ export default function TableFilters({
   }
 
   function handleToChange(value: string) {
-    setToInput(value);
-
     update({
       to: toApiDateTime(value),
       page: 1,
@@ -131,9 +190,8 @@ export default function TableFilters({
   }
 
   function clearFilters() {
-    setBrand("");
-
-    update({
+    updateState({
+      ...currentState,
       page: 1,
       channel: undefined,
       status: undefined,
@@ -144,6 +202,10 @@ export default function TableFilters({
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+      {/* ------------------------------------------------------------------ */}
+      {/* Header                                                             */}
+      {/* ------------------------------------------------------------------ */}
+
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h2 className="font-semibold text-gray-900">فیلترها</h2>
@@ -158,27 +220,21 @@ export default function TableFilters({
         </button>
       </div>
 
+      {/* ------------------------------------------------------------------ */}
+      {/* Main Filters                                                       */}
+      {/* ------------------------------------------------------------------ */}
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Brand */}
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700">
-            برند
-          </label>
-          <div className="flex gap-1 rounded-lg border border-gray-200 px-3 py-2.5">
-            <input
-              type="text"
-              value={brand}
-              onChange={(event) => handleBrandChange(event.target.value)}
-              placeholder="نام برند"
-              className="w-full  bg-white  text-sm outline-none transition focus:border-gray-400"
-            />
-            <button onClick={handleFilterBrand}>
-              <MagnifyingGlassIcon className="size-4" />
-            </button>
-          </div>
-        </div>
+
+        <BrandFilter
+          key={currentState.brand ?? ""}
+          value={currentState.brand}
+          onChange={handleBrandFilter}
+        />
 
         {/* Channel */}
+
         <div>
           <label className="mb-1.5 block text-sm font-medium text-gray-700">
             کانال
@@ -200,6 +256,7 @@ export default function TableFilters({
         </div>
 
         {/* Status */}
+
         <div>
           <label className="mb-1.5 block text-sm font-medium text-gray-700">
             وضعیت
@@ -221,6 +278,7 @@ export default function TableFilters({
         </div>
 
         {/* Sort */}
+
         <div>
           <label className="mb-1.5 block text-sm font-medium text-gray-700">
             مرتب‌سازی
@@ -244,9 +302,13 @@ export default function TableFilters({
         </div>
       </div>
 
-      {/* Date filters */}
+      {/* ------------------------------------------------------------------ */}
+      {/* Date Filters                                                       */}
+      {/* ------------------------------------------------------------------ */}
+
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* From */}
+
         <div>
           <label className="mb-1.5 block text-sm font-medium text-gray-700">
             از تاریخ
@@ -254,7 +316,7 @@ export default function TableFilters({
 
           <input
             type="datetime-local"
-            value={fromInput}
+            value={toDateTimeLocalValue(currentState.from)}
             onChange={(event) => handleFromChange(event.target.value)}
             className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none"
           />
@@ -267,6 +329,7 @@ export default function TableFilters({
         </div>
 
         {/* To */}
+
         <div>
           <label className="mb-1.5 block text-sm font-medium text-gray-700">
             تا تاریخ
@@ -274,7 +337,7 @@ export default function TableFilters({
 
           <input
             type="datetime-local"
-            value={toInput}
+            value={toDateTimeLocalValue(currentState.to)}
             onChange={(event) => handleToChange(event.target.value)}
             className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none"
           />
@@ -287,7 +350,10 @@ export default function TableFilters({
         </div>
       </div>
 
-      {/* Page size */}
+      {/* ------------------------------------------------------------------ */}
+      {/* Page Size                                                          */}
+      {/* ------------------------------------------------------------------ */}
+
       <div className="mt-4 flex items-center gap-3">
         <label className="text-sm text-gray-600">تعداد در صفحه</label>
 

@@ -17,10 +17,8 @@ export default function NewPostPage() {
         isSubmitting={createPost.isPending}
         onSubmit={async (values) => {
           const payload = toCreatePostPayload(values);
-
-          const post = await createPost.mutateAsync(payload);
-          console.log(post);
-          router.push(`/`);
+          await createPost.mutateAsync(payload);
+          router.push("/");
         }}
       />
     </div>

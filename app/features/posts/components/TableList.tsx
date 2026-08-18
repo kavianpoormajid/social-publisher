@@ -6,6 +6,7 @@ import { Post } from "@/types/global";
 import { GetPostsResponse } from "../posts.type";
 import { PostsUrlState } from "@/utils/url-state";
 import { formatJalaliDateTime } from "@/utils/date";
+import Link from "next/link";
 
 interface TableListProps {
   data?: GetPostsResponse;
@@ -190,12 +191,13 @@ export default function TableList({
 
                   {/* Created */}
                   <td className="grid grid-cols-1 px-4 py-3 text-sm text-gray-500">
-                    <button
+                    <Link
+                      href={`/edit/${item.id}`}
                       type="button"
-                      className="rounded-lg bg-blue-900 px-3 py-2 text-sm text-white"
+                      className="text-center mx-auto rounded-lg bg-blue-900 px-3 py-2 text-sm text-white"
                     >
                       ویرایش
-                    </button>
+                    </Link>
 
                     <div className="text-center">
                       ایجاد در تاریخ:

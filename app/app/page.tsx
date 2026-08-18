@@ -94,47 +94,46 @@ export default function Home() {
 
   const { data, isLoading, error, refetch } = usePosts(postsParams);
 
-  if (isLoading) {
-    return <LoadingState />;
-  }
-
   if (error) {
     return <ErrorState onRetry={refetch} />;
   }
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3 shadow-sm">
-      <div className="mb-3 flex justify-between">
-        <PostViewToggle viewType={state.view} changeView={changeView} />
-        <Link
-          href="/create"
-          type="button"
-          className="rounded-lg flex gap-2 items-center border border-gray-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <PlusCircleIcon className="size-6" />
-          پست جدید
-        </Link>
-      </div>
+    <>
+      {isLoading && <LoadingState />}
+      <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3 shadow-sm">
+        <div className="mb-3 flex justify-between">
+          <PostViewToggle viewType={state.view} changeView={changeView} />
+          <Link
+            href="/create"
+            type="button"
+            className="rounded-lg flex gap-2 items-center border border-gray-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <PlusCircleIcon className="size-6" />
+            پست جدید
+          </Link>
+        </div>
 
-      <div className="mt-4">
-        {viewType === POSTS_VIEW_ENUM.BOARD ? (
-          <DataView
-            data={data}
-            type="board"
-            columns={Constants.WEEK_DAYS}
-            updateState={updateState}
-            weekRange={weekRange}
-            params={state}
-          />
-        ) : (
-          <DataView
-            data={data}
-            type="table"
-            updateState={updateState}
-            params={state}
-          />
-        )}
+        <div className="mt-4">
+          {viewType === POSTS_VIEW_ENUM.BOARD ? (
+            <DataView
+              data={data}
+              type="board"
+              columns={Constants.WEEK_DAYS}
+              updateState={updateState}
+              weekRange={weekRange}
+              params={state}
+            />
+          ) : (
+            <DataView
+              data={data}
+              type="table"
+              updateState={updateState}
+              params={state}
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
