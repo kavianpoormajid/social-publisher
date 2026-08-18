@@ -5,13 +5,17 @@ import { format } from "date-fns-jalali";
 
 import BoardCard from "./BoardCard";
 import { Post } from "@/types/global";
+import { BulkResultIdsProps } from "./TableList";
 
 interface BoardDayProps {
   id: string;
   label: string;
   date: Date;
   posts: Post[];
+  selectedIds: string[];
   isMoving: boolean;
+  bulkResult: BulkResultIdsProps[];
+  togglePost: (id: string) => void;
 }
 
 export default function BoardDay({
@@ -20,6 +24,9 @@ export default function BoardDay({
   date,
   posts,
   isMoving,
+  togglePost,
+  selectedIds,
+  bulkResult,
 }: BoardDayProps) {
   const { ref, isDropTarget } = useDroppable({
     id,
@@ -53,9 +60,22 @@ export default function BoardDay({
       {/* Posts */}
 
       <div className="space-y-2">
-        {posts.map((post) => (
-          <BoardCard key={post.id} post={post} disabled={isMoving} />
-        ))}
+        {posts.map((post) => {
+          return (
+            <BoardCard
+              key={post.id}
+              post={post}
+              disabled={isMoving}
+              togglePost={togglePost}
+              selected={
+                selectedIds.length > 0 ? selectedIds.includes(post.id) : false
+              }
+              itemBulkExist={bulkResult.find(
+                (i: BulkResultIdsProps) => i.id == post.id,
+              )}
+            />
+          );
+        })}
       </div>
     </section>
   );

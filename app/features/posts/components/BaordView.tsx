@@ -11,7 +11,12 @@ import BoardDay from "./BoardDay";
 import { GetPostsResponse } from "../posts.type";
 import { useMovePost } from "../commands/use-move-post";
 import WeekNavigation from "./WeekNavigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { BulkResultIdsProps } from "./TableList";
+import MultiplePostsOperation, {
+  MultiplePostsOperationResult,
+} from "./MultiplePostsOperation";
+import BulkReportModal from "./BulkReportModal";
 
 interface BoardViewProps {
   data?: GetPostsResponse;
@@ -42,6 +47,10 @@ export default function BoardView({
   updateState,
 }: BoardViewProps) {
   const movePost = useMovePost();
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkResult, setBulkResult] = useState<BulkResultIdsProps[]>([]);
+  const [openBulkReportModal, setOpenBulkReportModal] =
+    useState<boolean>(false);
 
   const startDate = parseISO(weekRange.week.startApi);
 
@@ -133,7 +142,6 @@ export default function BoardView({
      */
     const scheduledAt =
       `${targetDate}T` + `${hours}:${minutes}:${seconds}` + timezone;
-
     movePost.mutate({
       id: postId,
       scheduledAt,
@@ -150,34 +158,111 @@ export default function BoardView({
     });
   }, [weekRange.week.startApi, weekRange.week.endApi, updateState]);
 
-  return (
-    <div className="grid grid-cols-1 gap-5">
-      <WeekNavigation weekRange={weekRange} />
-      <DragDropProvider onDragEnd={handleDragEnd}>
-        <div dir="rtl" className="grid grid-cols-7 gap-3">
-          {days.map((day) => {
-            const posts =
-              data?.items.filter((post) => {
-                const postDate = format(
-                  parseISO(post.scheduledAt),
-                  "yyyy-MM-dd",
-                );
-                return postDate === day.id;
-              }) ?? [];
+  function togglePost(id: string) {
+    setBulkResult([]);
+    setSelectedIds((current) =>
+      current.includes(id)
+        ? current.filter((itemId) => itemId !== id)
+        : [...current, id],
+    );
+  }
 
-            return (
-              <BoardDay
-                key={day.id}
-                id={day.id}
-                label={day.label}
-                date={day.date}
-                posts={posts}
-                isMoving={movePost.isPending}
+  function handleOpenBulkReportModal() {
+    setOpenBulkReportModal(true);
+  }
+  function handleCloseBulkReportModal() {
+    setBulkResult([]);
+    setOpenBulkReportModal(false);
+  }
+  async function handleOnCompletedBulkUpdate(
+    result: MultiplePostsOperationResult,
+  ) {
+    console.log("Bulk operation completed:", result);
+    setSelectedIds([]);
+    setBulkResult([
+      ...result.failed.map((i) => {
+        return {
+          id: i.id,
+          post: data?.items.find((i) => i.id == i.id),
+          bgColor: "bg-red-200",
+          reason: i.reason,
+          isFailed: true,
+        };
+      }),
+      ...result.successIds.map((i) => {
+        return {
+          id: i,
+          post: data?.items.find((i) => i.id == i.id),
+          bgColor: "bg-green-200",
+          isFailed: false,
+        };
+      }),
+    ]);
+    // open report for bulk
+    handleOpenBulkReportModal();
+  }
+  function handleOnDragStart() {
+    setSelectedIds([]);
+  }
+  return (
+    <>
+      <BulkReportModal
+        isOpen={openBulkReportModal}
+        onClose={handleCloseBulkReportModal}
+        result={bulkResult}
+      />
+      <div className="grid grid-cols-1 gap-5">
+        <WeekNavigation weekRange={weekRange} />
+        <div>
+          {selectedIds.length > 0 && (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-600">
+                {selectedIds.length} انتخاب شده
+              </span>
+
+              <MultiplePostsOperation
+                ids={selectedIds}
+                onComplete={handleOnCompletedBulkUpdate}
+                onStart={() => {
+                  // console.log("Bulk operation started");
+                }}
               />
-            );
-          })}
+            </div>
+          )}
         </div>
-      </DragDropProvider>
-    </div>
+
+        <DragDropProvider
+          onDragEnd={handleDragEnd}
+          onBeforeDragStart={handleOnDragStart}
+        >
+          <div dir="rtl" className="grid grid-cols-7 gap-3">
+            {days.map((day) => {
+              const posts =
+                data?.items.filter((post) => {
+                  const postDate = format(
+                    parseISO(post.scheduledAt),
+                    "yyyy-MM-dd",
+                  );
+                  return postDate === day.id;
+                }) ?? [];
+
+              return (
+                <BoardDay
+                  key={day.id}
+                  id={day.id}
+                  label={day.label}
+                  date={day.date}
+                  posts={posts}
+                  isMoving={movePost.isPending}
+                  togglePost={togglePost}
+                  selectedIds={selectedIds}
+                  bulkResult={bulkResult}
+                />
+              );
+            })}
+          </div>
+        </DragDropProvider>
+      </div>
+    </>
   );
 }
