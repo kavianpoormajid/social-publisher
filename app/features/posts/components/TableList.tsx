@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Post } from "@/types/global";
 import { GetPostsResponse } from "../posts.type";
@@ -11,11 +11,13 @@ import MultiplePostsOperation, {
   MultiplePostsOperationResult,
 } from "./MultiplePostsOperation";
 import BulkReportModal from "./BulkReportModal";
+import { HistoryType } from "@/utils/hooks/use-commad-history";
 
 interface TableListProps {
   data?: GetPostsResponse;
   currentState: PostsUrlState;
   updateState: (state: PostsUrlState) => void;
+  history: HistoryType;
 }
 export interface BulkResultIdsProps {
   id: string;
@@ -29,6 +31,7 @@ export default function TableList({
   data,
   updateState,
   currentState,
+  history,
 }: TableListProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [bulkResult, setBulkResult] = useState<BulkResultIdsProps[]>([]);
@@ -47,9 +50,9 @@ export default function TableList({
   /*
    * Pagination
    */
-  const page = data?.page ?? currentState.page ?? 1;
-  const pageSize = data?.pageSize ?? currentState.pageSize ?? 20;
-  const totalCount = data?.totalCount ?? 0;
+  const page = data ? (data.page ?? currentState.page ?? 1) : 1;
+  const pageSize = data ? (data?.pageSize ?? currentState.pageSize ?? 20) : 20;
+  const totalCount = data ? (data?.totalCount ?? 0) : 0;
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
@@ -107,25 +110,27 @@ export default function TableList({
     result: MultiplePostsOperationResult,
   ) {
     console.log("Bulk operation completed:", result);
+
     setBulkResult([
-      ...result.failed.map((i) => {
+      ...result.failed.map((failed) => {
         return {
-          id: i.id,
-          post: data?.items.find((i) => i.id == i.id),
+          id: failed.id,
+          post: data?.items.find((dataItem) => dataItem.id == failed.id),
           bgColor: "bg-red-200",
-          reason: i.reason,
+          reason: failed.reason,
           isFailed: true,
         };
       }),
-      ...result.successIds.map((i) => {
+      ...result.successIds.map((successId) => {
         return {
-          id: i,
-          post: data?.items.find((i) => i.id == i.id),
+          id: successId,
+          post: data?.items.find((e) => e.id == successId),
           bgColor: "bg-green-200",
           isFailed: false,
         };
       }),
     ]);
+
     setSelectedIds([]);
     // open report for bulk
     handleOpenBulkReportModal();
@@ -144,21 +149,20 @@ export default function TableList({
         <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
           <div className="text-sm text-gray-500">{totalCount} پست</div>
 
-          {selectedIds.length > 0 && (
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600">
-                {selectedIds.length} انتخاب شده
-              </span>
+          {/* {selectedIds.length > 0 && ( */}
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-600">
+              {selectedIds.length} انتخاب شده
+            </span>
 
-              <MultiplePostsOperation
-                ids={selectedIds}
-                onComplete={handleOnCompletedBulkUpdate}
-                onStart={() => {
-                  // console.log("Bulk operation started");
-                }}
-              />
-            </div>
-          )}
+            <MultiplePostsOperation
+              ids={selectedIds}
+              onComplete={handleOnCompletedBulkUpdate}
+              data={data}
+              history={history}
+            />
+          </div>
+          {/* )} */}
         </div>
 
         {/* Table */}
@@ -286,33 +290,35 @@ export default function TableList({
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3">
-          <div className="text-sm text-gray-500">
-            صفحه {page} از {totalPages}
-          </div>
+        {data && (
+          <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3">
+            <div className="text-sm text-gray-500">
+              صفحه {page} از {totalPages}
+            </div>
 
-          <div className="flex gap-2">
-            {/* Previous */}
-            <button
-              type="button"
-              onClick={() => goToPage(page - 1)}
-              disabled={!hasPreviousPage}
-              className="rounded-lg border border-gray-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              قبلی
-            </button>
+            <div className="flex gap-2">
+              {/* Previous */}
+              <button
+                type="button"
+                onClick={() => goToPage(page - 1)}
+                disabled={!hasPreviousPage}
+                className="rounded-lg border border-gray-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                قبلی
+              </button>
 
-            {/* Next */}
-            <button
-              type="button"
-              onClick={() => goToPage(page + 1)}
-              disabled={!hasNextPage}
-              className="rounded-lg border border-gray-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              بعدی
-            </button>
+              {/* Next */}
+              <button
+                type="button"
+                onClick={() => goToPage(page + 1)}
+                disabled={!hasNextPage}
+                className="rounded-lg border border-gray-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                بعدی
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );

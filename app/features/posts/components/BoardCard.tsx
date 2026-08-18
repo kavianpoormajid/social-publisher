@@ -5,7 +5,6 @@ import { useDraggable } from "@dnd-kit/react";
 import { StopCircleIcon } from "@heroicons/react/24/solid";
 import { format, parseISO } from "date-fns-jalali";
 import { BulkResultIdsProps } from "./TableList";
-import { useEffect, useState } from "react";
 
 interface BoardCardProps {
   post: Post;

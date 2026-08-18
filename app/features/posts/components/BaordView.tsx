@@ -17,6 +17,7 @@ import MultiplePostsOperation, {
   MultiplePostsOperationResult,
 } from "./MultiplePostsOperation";
 import BulkReportModal from "./BulkReportModal";
+import { HistoryType } from "@/utils/hooks/use-commad-history";
 
 interface BoardViewProps {
   data?: GetPostsResponse;
@@ -27,6 +28,7 @@ interface BoardViewProps {
     previousWeek: () => void;
     currentWeek: () => void;
   };
+  history: HistoryType;
 
   updateState: (state: PostsUrlState) => void;
 }
@@ -45,6 +47,7 @@ export default function BoardView({
   data,
   weekRange,
   updateState,
+  history,
 }: BoardViewProps) {
   const movePost = useMovePost();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -142,10 +145,28 @@ export default function BoardView({
      */
     const scheduledAt =
       `${targetDate}T` + `${hours}:${minutes}:${seconds}` + timezone;
-    movePost.mutate({
-      id: postId,
-      scheduledAt,
-    });
+
+    const beforeData = {
+      scheduledAt: post.scheduledAt,
+    };
+    movePost.mutate(
+      {
+        id: postId,
+        scheduledAt,
+      },
+      {
+        onSuccess: () => {
+          history.addHistory({
+            action: "update",
+            postId,
+            afterData: {
+              scheduledAt,
+            },
+            beforeData,
+          });
+        },
+      },
+    );
   }
   useEffect(() => {
     const nextFrom = weekRange.week.startApi;
@@ -177,7 +198,6 @@ export default function BoardView({
   async function handleOnCompletedBulkUpdate(
     result: MultiplePostsOperationResult,
   ) {
-    console.log("Bulk operation completed:", result);
     setSelectedIds([]);
     setBulkResult([
       ...result.failed.map((i) => {
@@ -214,21 +234,18 @@ export default function BoardView({
       <div className="grid grid-cols-1 gap-5">
         <WeekNavigation weekRange={weekRange} />
         <div>
-          {selectedIds.length > 0 && (
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600">
-                {selectedIds.length} انتخاب شده
-              </span>
+          <div className="flex items-center gap-3 justify-end">
+            <span className="text-sm text-gray-600">
+              {selectedIds.length} انتخاب شده
+            </span>
 
-              <MultiplePostsOperation
-                ids={selectedIds}
-                onComplete={handleOnCompletedBulkUpdate}
-                onStart={() => {
-                  // console.log("Bulk operation started");
-                }}
-              />
-            </div>
-          )}
+            <MultiplePostsOperation
+              ids={selectedIds}
+              onComplete={handleOnCompletedBulkUpdate}
+              history={history}
+              data={data}
+            />
+          </div>
         </div>
 
         <DragDropProvider

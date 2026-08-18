@@ -4,6 +4,7 @@ import BaordView from "./BaordView";
 import { PostsUrlState } from "@/utils/url-state";
 import { WeekRange } from "@/utils/hooks/use-week-range";
 import TableView from "./TableView";
+import useCommandHistory from "@/utils/hooks/use-commad-history";
 
 type BaseDataViewProps = {
   data: GetPostsResponse | undefined;
@@ -32,12 +33,14 @@ type TableViewProps = BaseDataViewProps & {
 export type DataViewProps<T> = BoardViewProps<T> | TableViewProps;
 
 export default function DataView<T>(props: DataViewProps<T>) {
+  const history = useCommandHistory();
   if (props.type === "board") {
     return (
       <BaordView
         data={props.data}
         weekRange={props.weekRange}
         updateState={props.updateState}
+        history={history}
       />
     );
   } else
@@ -46,6 +49,7 @@ export default function DataView<T>(props: DataViewProps<T>) {
         currentState={props.params}
         updateState={props.updateState}
         data={props.data}
+        history={history}
       />
     );
 }

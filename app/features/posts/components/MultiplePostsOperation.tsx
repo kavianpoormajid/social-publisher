@@ -7,12 +7,16 @@ import { PostStatus } from "@/types/global";
 import { useBulkUpdatePosts } from "../commands/use-bulk-update-posts";
 import { BulkUpdatePayload, BulkUpdateResponse } from "../api/posts-api";
 import { appToast } from "@/components/app-toast";
+import { GetPostsResponse } from "../posts.type";
+import { HistoryItem, HistoryType } from "@/utils/hooks/use-commad-history";
 
 interface MultiplePostsOperationProps {
   ids: string[];
 
   onComplete?: (result: MultiplePostsOperationResult) => void;
   onStart?: () => void;
+  data: GetPostsResponse | undefined;
+  history: HistoryType;
 }
 
 export interface MultiplePostsOperationResult {
@@ -51,6 +55,8 @@ export default function MultiplePostsOperation({
   ids,
   onComplete,
   onStart,
+  data,
+  history,
 }: MultiplePostsOperationProps) {
   const bulkUpdate = useBulkUpdatePosts();
 
@@ -74,8 +80,10 @@ export default function MultiplePostsOperation({
     if (bulkUpdate.isPending) {
       return;
     }
-
     setIsOpen(false);
+    // reset after close
+    setChangeStatus(false);
+    setChangeScheduledAt(false);
   }
 
   function buildPatch(): PatchState {
@@ -102,7 +110,6 @@ export default function MultiplePostsOperation({
       appToast.warning("حداقل یک مورد تغییر را انتخاب کنید");
       return;
     }
-
     onStart?.();
 
     try {
@@ -110,13 +117,29 @@ export default function MultiplePostsOperation({
         ids,
         patch,
       };
+      const historyData: HistoryItem = {
+        action: "bulk-update",
 
+        items: payload.ids.map((postId) => {
+          const product = data?.items.find((i) => i.id == postId);
+          return {
+            postId: postId,
+
+            beforeData: {
+              status: product?.status,
+              scheduledAt: product?.scheduledAt,
+            },
+
+            afterData: payload.patch,
+          };
+        }),
+      };
       const result = await bulkUpdate.mutateAsync(payload);
 
       const normalizedResult = normalizeResult(result, ids);
 
       setIsOpen(false);
-
+      history.addHistory(historyData);
       onComplete?.(normalizedResult);
     } catch {
       /*
