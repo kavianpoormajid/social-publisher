@@ -44,7 +44,7 @@ export function useDeletePost() {
 
             items: current.items.filter((post) => post.id !== id),
 
-            total: Math.max(0, current.total - 1),
+            total: Math.max(0, current.totalCount - 1),
           };
         },
       );

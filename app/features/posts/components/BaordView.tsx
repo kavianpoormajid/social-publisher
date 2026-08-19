@@ -18,6 +18,10 @@ import MultiplePostsOperation, {
 } from "./MultiplePostsOperation";
 import BulkReportModal from "./BulkReportModal";
 import { HistoryType } from "@/utils/hooks/use-commad-history";
+import { toApiDateTime } from "@/utils/date";
+import { appToast } from "@/components/app-toast";
+import apiErrorMessage from "@/utils/api-error-message";
+import { useBulkUpdatePosts } from "../commands/use-bulk-update-posts";
 
 interface BoardViewProps {
   data?: GetPostsResponse;
@@ -50,6 +54,7 @@ export default function BoardView({
   history,
 }: BoardViewProps) {
   const movePost = useMovePost();
+  const bulkUpdatePosts = useBulkUpdatePosts();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [bulkResult, setBulkResult] = useState<BulkResultIdsProps[]>([]);
   const [openBulkReportModal, setOpenBulkReportModal] =
@@ -107,7 +112,6 @@ export default function BoardView({
 
     const oldDate = parseISO(post.scheduledAt);
 
-    // تاریخ فعلی پست
     const currentDate = format(oldDate, "yyyy-MM-dd");
 
     if (currentDate === targetDate) {
@@ -116,43 +120,49 @@ export default function BoardView({
 
     /*
      * ساعت پست را نگه می‌داریم.
-     *
      * 2026-08-20T08:20:00+03:30
      *                    ↑
      *              timezone
      */
     const hours = String(oldDate.getHours()).padStart(2, "0");
-
     const minutes = String(oldDate.getMinutes()).padStart(2, "0");
-
     const seconds = String(oldDate.getSeconds()).padStart(2, "0");
 
-    /*
-     * timezone فعلی را از scheduledAt اصلی
-     * استخراج می‌کنیم.
-     *
-     * مثال:
-     * +03:30
-     */
-    const timezoneMatch = post.scheduledAt.match(/([+-]\d{2}:\d{2}|Z)$/);
-
-    const timezone = timezoneMatch?.[1] ?? "+03:30";
-
-    /*
-     * نتیجه:
-     *
-     * 2026-08-21T08:20:00+03:30
-     */
-    const scheduledAt =
-      `${targetDate}T` + `${hours}:${minutes}:${seconds}` + timezone;
+    const scheduledAt = toApiDateTime(
+      `${targetDate}T` + `${hours}:${minutes}:${seconds}`,
+    );
 
     const beforeData = {
       scheduledAt: post.scheduledAt,
     };
-    movePost.mutate(
+    // movePost.mutate(
+    //   {
+    //     id: postId,
+    //     scheduledAt,
+    //   },
+    //   {
+    //     onSuccess: () => {
+    //       history.addHistory({
+    //         action: "update",
+    //         postId,
+    //         afterData: {
+    //           scheduledAt,
+    //         },
+    //         beforeData,
+    //       });
+    //     },
+    //     onError: (error) => {
+    //       appToast.error(apiErrorMessage(error));
+    //     },
+    //   },
+    // );
+
+    bulkUpdatePosts.mutate(
       {
-        id: postId,
-        scheduledAt,
+        ids: [postId],
+        patch: {
+          scheduledAt,
+        },
       },
       {
         onSuccess: () => {
@@ -164,6 +174,9 @@ export default function BoardView({
             },
             beforeData,
           });
+        },
+        onError: (error) => {
+          appToast.error(apiErrorMessage(error));
         },
       },
     );

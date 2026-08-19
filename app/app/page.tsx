@@ -55,6 +55,8 @@ export default function Home() {
         from: weekRange.week.startApi,
         to: weekRange.week.endApi,
         sort: "scheduledAt:asc",
+        page: 1,
+        pageSize: 200,
       });
 
       return;
@@ -76,10 +78,11 @@ export default function Home() {
   const postsParams =
     viewType === POSTS_VIEW_ENUM.BOARD
       ? {
-          page: state.page,
+          page: 1,
           pageSize: state.pageSize,
           from: weekRange.week.startApi,
           to: weekRange.week.endApi,
+          PageSize: 200,
         }
       : {
           page: state.page,

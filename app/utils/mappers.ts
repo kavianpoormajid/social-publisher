@@ -3,6 +3,7 @@ import {
   CreatePostPayload,
   UpdatePostPayload,
 } from "@/features/posts/posts.type";
+import { toApiDateTime } from "./date";
 
 export function toCreatePostPayload(values: PostFormValues): CreatePostPayload {
   return {
@@ -11,7 +12,7 @@ export function toCreatePostPayload(values: PostFormValues): CreatePostPayload {
     content: values.content,
     hashtags: values.hashtags,
     imageUrls: values.imageUrls,
-    scheduledAt: values.scheduledAt,
+    scheduledAt: toApiDateTime(values.scheduledAt),
     status: "scheduled",
   };
 }
@@ -23,6 +24,6 @@ export function toUpdatePostPayload(values: PostFormValues): UpdatePostPayload {
     content: values.content,
     hashtags: values.hashtags,
     imageUrls: values.imageUrls,
-    scheduledAt: values.scheduledAt,
+    scheduledAt: toApiDateTime(values.scheduledAt),
   };
 }

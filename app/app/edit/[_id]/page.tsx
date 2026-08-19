@@ -11,6 +11,10 @@ import { useUpdatePost } from "@/features/posts/commands/use-update-post";
 
 import { PostFormValues } from "@/features/posts/post-validation";
 import { PostEditor } from "@/features/posts/components/PostEditor";
+import { toApiDateTime } from "@/utils/date";
+import { toUpdatePostPayload } from "@/utils/mappers";
+import { appToast } from "@/components/app-toast";
+import apiErrorMessage from "@/utils/api-error-message";
 
 interface EditPostPageProps {
   params: Promise<{
@@ -29,19 +33,16 @@ export default function EditPostPage({ params }: EditPostPageProps) {
   const updatePost = useUpdatePost();
 
   async function handleSubmit(values: PostFormValues) {
-    await updatePost.mutateAsync({
-      id: _id,
-      payload: {
-        brand: values.brand,
-        channel: values.channel,
-        content: values.content,
-        hashtags: values.hashtags,
-        imageUrls: values.imageUrls,
-        scheduledAt: values.scheduledAt,
-      },
-    });
+    try {
+      await updatePost.mutateAsync({
+        id: _id,
+        payload: toUpdatePostPayload(values),
+      });
 
-    router.push("/");
+      router.push("/");
+    } catch (error) {
+      appToast.error(apiErrorMessage(error));
+    }
   }
 
   function handleCancel() {
