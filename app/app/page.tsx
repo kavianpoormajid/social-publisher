@@ -40,6 +40,7 @@ export default function Home() {
     (nextState: PostsUrlState) => {
       const params = createPostsSearchParams(nextState);
       const queryString = params.toString();
+
       router.push(queryString ? `${pathname}?${queryString}` : pathname);
     },
     [router, pathname],

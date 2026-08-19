@@ -170,6 +170,7 @@ export default function MultiplePostsOperation({
       {/* Trigger */}
       <button
         type="button"
+        data-testid="bulk-edit-modal-button"
         onClick={openModal}
         disabled={ids.length === 0 || bulkUpdate.isPending}
         className="rounded-lg bg-gray-900 px-3 py-2 text-sm text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-40"
@@ -249,6 +250,7 @@ export default function MultiplePostsOperation({
                 <label className="flex cursor-pointer items-center gap-3">
                   <input
                     type="checkbox"
+                    data-testid="bulk-edit-scheduled-checkbox-input"
                     checked={changeScheduledAt}
                     onChange={(event) =>
                       setChangeScheduledAt(event.target.checked)
@@ -271,6 +273,7 @@ export default function MultiplePostsOperation({
                     <input
                       type="datetime-local"
                       value={scheduledAt}
+                      data-testid="bulk-edit-scheduled-value-input"
                       onChange={(event) => setScheduledAt(event.target.value)}
                       disabled={bulkUpdate.isPending}
                       className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-gray-400"
@@ -300,6 +303,7 @@ export default function MultiplePostsOperation({
 
               <button
                 type="button"
+                data-testid="bulk-edit-submit"
                 onClick={handleSubmit}
                 disabled={!canSubmit}
                 className="rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-40"

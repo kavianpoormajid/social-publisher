@@ -109,8 +109,6 @@ export default function TableList({
   async function handleOnCompletedBulkUpdate(
     result: MultiplePostsOperationResult,
   ) {
-    console.log("Bulk operation completed:", result);
-
     setBulkResult([
       ...result.failed.map((failed) => {
         return {
@@ -211,9 +209,11 @@ export default function TableList({
                 const itemBulkExist = bulkResult.find(
                   (i: BulkResultIdsProps) => i.id == item.id,
                 );
+
                 return (
                   <tr
                     key={item.id}
+                    data-testid={`post-item-row-${item.id}`}
                     className={`
                     transition-all duration-300
                     ${itemBulkExist ? itemBulkExist.bgColor : selected ? "bg-gray-50" : "hover:bg-gray-50"}
@@ -223,6 +223,7 @@ export default function TableList({
                     <td className="px-4 py-3">
                       <input
                         type="checkbox"
+                        data-testid={`post-item-select-checkbox-input-${item.id}`}
                         checked={selected}
                         onChange={() => togglePost(item.id)}
                         className="h-4 w-4 rounded"
@@ -249,7 +250,10 @@ export default function TableList({
                     </td>
 
                     {/* Scheduled */}
-                    <td className="px-4 py-3 text-sm text-gray-700">
+                    <td
+                      data-testid={`post-item-scheduledat-${item.id}`}
+                      className="px-4 py-3 text-sm text-gray-700"
+                    >
                       {formatJalaliDateTime(item.scheduledAt)}
                     </td>
 

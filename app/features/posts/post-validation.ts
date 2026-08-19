@@ -25,7 +25,11 @@ export const instagramPostSchema = basePostSchema.extend({
     .max(30, "تعداد هشتگ‌های اینستاگرام نمی‌تواند بیشتر از ۳۰ عدد باشد"),
 
   imageUrls: z
-    .array(z.url())
+    .array(
+      z.url({
+        error: "یک آدرس معبتر وارد نمایید",
+      }),
+    )
     .min(1, "برای انتشار در اینستاگرام حداقل یک تصویر لازم است"),
 });
 
@@ -39,7 +43,11 @@ export const telegramPostSchema = basePostSchema.extend({
 
   hashtags: z.array(hashtagSchema),
 
-  imageUrls: z.array(z.url()),
+  imageUrls: z.array(
+    z.url({
+      error: "یک آدرس معبتر وارد نمایید",
+    }),
+  ),
 });
 
 export const linkedinPostSchema = basePostSchema.extend({
@@ -54,7 +62,11 @@ export const linkedinPostSchema = basePostSchema.extend({
     .array(hashtagSchema)
     .max(5, "تعداد هشتگ‌های لینکدین نمی‌تواند بیشتر از ۵ عدد باشد"),
 
-  imageUrls: z.array(z.url()),
+  imageUrls: z.array(
+    z.url({
+      error: "یک آدرس معبتر وارد نمایید",
+    }),
+  ),
 });
 
 function countXCharacters(content: string): number {
@@ -88,7 +100,11 @@ export const xPostSchema = basePostSchema.extend({
     .max(4, "تعداد هشتگ‌های X نمی‌تواند بیشتر از ۴ عدد باشد"),
 
   imageUrls: z
-    .array(z.url())
+    .array(
+      z.url({
+        error: "یک آدرس معبتر وارد نمایید",
+      }),
+    )
     .max(4, "تعداد تصاویر X نمی‌تواند بیشتر از ۴ تصویر باشد"),
 });
 

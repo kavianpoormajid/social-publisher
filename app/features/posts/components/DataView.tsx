@@ -34,6 +34,7 @@ export type DataViewProps<T> = BoardViewProps<T> | TableViewProps;
 
 export default function DataView<T>(props: DataViewProps<T>) {
   const history = useCommandHistory();
+
   if (props.type === "board") {
     return (
       <BaordView

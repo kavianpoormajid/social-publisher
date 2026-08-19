@@ -16,6 +16,7 @@ export default function WeekNavigation({
       {/* Previous Week */}
       <button
         type="button"
+        data-testid="previous-week-button"
         onClick={() => weekRange.previousWeek()}
         aria-label="هفته قبل"
         className="
@@ -46,6 +47,7 @@ export default function WeekNavigation({
       {/* Next Week */}
       <button
         type="button"
+        data-testid="next-week-button"
         onClick={() => weekRange.nextWeek()}
         aria-label="هفته بعد"
         className="

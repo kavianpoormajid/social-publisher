@@ -14,6 +14,7 @@ export default function PostViewToggle({
       {/* Board */}
       <button
         type="button"
+        data-testid="board-view-button"
         onClick={() => changeView(POSTS_VIEW_ENUM.BOARD)}
         className={`
           flex items-center gap-2 rounded-lg px-4 py-2
@@ -34,6 +35,7 @@ export default function PostViewToggle({
       {/* Table */}
       <button
         type="button"
+        data-testid="table-view-button"
         onClick={() => changeView(POSTS_VIEW_ENUM.TABLE)}
         className={`
           flex items-center gap-2 rounded-lg px-4 py-2

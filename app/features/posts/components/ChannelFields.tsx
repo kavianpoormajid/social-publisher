@@ -187,6 +187,11 @@ function ImageUrlsField({
           {errors.imageUrls.message?.toString()}
         </p>
       )}
+      {errors.imageUrls?.[0] && (
+        <p className="text-xs font-medium text-red-600">
+          {errors.imageUrls[0].message?.toString()}
+        </p>
+      )}
 
       {/* Minimum images */}
       {minImages > 0 && (

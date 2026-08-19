@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { postQueryKeys } from "./keys";
 import { GetPostsParams } from "../posts.type";
@@ -9,5 +9,6 @@ export function usePosts(params: GetPostsParams) {
     queryKey: postQueryKeys.list(params),
 
     queryFn: () => getPosts(params),
+    placeholderData: keepPreviousData,
   });
 }

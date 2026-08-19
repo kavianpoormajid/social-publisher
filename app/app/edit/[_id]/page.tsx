@@ -11,7 +11,6 @@ import { useUpdatePost } from "@/features/posts/commands/use-update-post";
 
 import { PostFormValues } from "@/features/posts/post-validation";
 import { PostEditor } from "@/features/posts/components/PostEditor";
-import { toApiDateTime } from "@/utils/date";
 import { toUpdatePostPayload } from "@/utils/mappers";
 import { appToast } from "@/components/app-toast";
 import apiErrorMessage from "@/utils/api-error-message";

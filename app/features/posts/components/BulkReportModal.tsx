@@ -25,6 +25,7 @@ export default function BulkReportModal({
 
   return (
     <div
+      data-testid="bulk-report-modal"
       dir="rtl"
       className="fixed inset-0 z-9999 flex justify-end bg-black/20 backdrop-blur-[2px]"
     >
@@ -68,7 +69,10 @@ export default function BulkReportModal({
               <span className="text-xs font-medium text-green-700">موفق</span>
             </div>
 
-            <div className="mt-2 text-xl font-bold text-green-700">
+            <div
+              data-testid="bulk-report-success-count"
+              className="mt-2 text-xl font-bold text-green-700"
+            >
               {successCount}
             </div>
           </div>
@@ -81,7 +85,10 @@ export default function BulkReportModal({
               <span className="text-xs font-medium text-red-700">ناموفق</span>
             </div>
 
-            <div className="mt-2 text-xl font-bold text-red-700">
+            <div
+              data-testid="bulk-report-failure-count"
+              className="mt-2 text-xl font-bold text-red-700"
+            >
               {failedCount}
             </div>
           </div>
@@ -162,6 +169,7 @@ export default function BulkReportModal({
         <div className="border-t border-gray-100 bg-gray-50 p-4">
           <button
             type="button"
+            data-testid="bulk-report-modal-close-button"
             onClick={onClose}
             className="
               w-full
