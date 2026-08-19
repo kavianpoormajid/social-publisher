@@ -1,16 +1,21 @@
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
 
-import { QueryProvider } from "@/providers/query-provider";
-import ToastProvider from "@/providers/toast-provider";
-import vazirFont from "./fonts/vazirFont";
-import "./globals.css";
+import { QueryProvider } from '@/providers/query-provider';
+import ToastProvider from '@/providers/toast-provider';
+import vazirFont from './fonts/vazirFont';
+import './globals.css';
+import type React from 'react';
 
 export const metadata: Metadata = {
-  title: "Publisher",
-  description: "Post Publisher ",
+  title: 'Publisher',
+  description: 'Post Publisher ',
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="fa"
