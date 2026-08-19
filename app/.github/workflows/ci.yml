@@ -4,15 +4,23 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "app/**"
 
   pull_request:
     branches:
       - main
+    paths:
+      - "app/**"
 
   workflow_dispatch:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: ./app
 
 jobs:
   quality:
@@ -33,6 +41,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
